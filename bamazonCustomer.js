@@ -18,57 +18,81 @@ const connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
+    start();
+});
 
+function start() {
+    inquirer.prompt([{
+        type: "list",
+        message: "Please choose one: ",
+        choices: ["SHOPPING", "EXIT"],
+        name: "choice"
+
+    }]).then(function (answer) {
+        if (answer.choice === "SHOPPING") {
+            shop();
+
+        } else {
+            connection.end();
+        }
+    });
+}
+
+function shop() {
     connection.query("SELECT * FROM products", function (err, res) {
-        console.table(res);
-        inquirer.prompt([{
-            type: "input",
-            message: "Ented ID number of the product you want to buy.",
-            name: "idNumber",
-            validate: function (value) {
-                if (isNaN(value) === false) {
-                    return true;
-                }
-                return false;
-            }
-        }, {
-            input: "input",
-            message: "How many units of the product would you like to buy?",
-            name: "quantity",
-            validate: function (value) {
-                if (isNaN(value) === false) {
-                    return true;
-                }
-                return false;
-            }
-        }]).then(function (answer) {
-            var chosenItem = res.filter(elem => elem.id === parseInt(answer.idNumber))[0];
-            if (chosenItem.stock_quantity < parseInt(answer.quantity)) {
-                console.log("insufficient quantity!");
-
-            } else {
-                var updatedQuantity = chosenItem.stock_quantity - parseInt(answer.quantity);
-                connection.query("UPDATE products SET ? WHERE ?", [
-                    {
-
-                        stock_quantity: updatedQuantity
-                    }, {
-                        id: parseInt(answer.idNumber)
+        connection.query("SELECT id, product_name, price FROM products", function (err, results) {
+            console.table(results);
+            inquirer.prompt([{
+                type: "input",
+                message: "Enter ID number of the product you want to buy.",
+                name: "idNumber",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
                     }
-                ], function (error) {
-                    // if (error) throw error;
-                    console.log(updatedQuantity);
-                    console.log("Total Cost of your purchase: " + parseInt(answer.quantity) * chosenItem.price);
+                    return false;
+                }
+            }, {
+                input: "input",
+                message: "How many units of the product would you like to buy?",
+                name: "quantity",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
+            }]).then(function (answer) {
+                var chosenItem = res.filter(elem => elem.id === parseInt(answer.idNumber))[0];
+                if (chosenItem.stock_quantity < parseInt(answer.quantity)) {
+                    console.log("insufficient quantity!");
+                    start();
 
-                })
-            };
+                } else {
+                    var updatedQuantity = chosenItem.stock_quantity - parseInt(answer.quantity);
+                    connection.query("UPDATE products SET ? WHERE ?", [
+                        {
 
+                            stock_quantity: updatedQuantity,
+                            product_sales: chosenItem.product_sales + (chosenItem.price * parseInt(answer.quantity))
+                        }, {
+                            id: parseInt(answer.idNumber)
+                        }
+                    ], function (error) {
+
+
+                        console.log("Total Cost of your purchase: " + parseInt(answer.quantity) * chosenItem.price);
+                        start();
+
+                    })
+                };
+
+            });
         });
 
+
     });
-
-
-});
+}
 
 
 
