@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const chalk = require('chalk');
 const cTable = require('console.table');
 
 const connection = mysql.createConnection({
@@ -64,7 +65,7 @@ function newDepartment(){
         department_name: answer.name,
         over_head_costs: answer.cost
     }, function(error){
-        console.log("New department added succesfully!");
+        console.log(chalk.red.bold("New department added succesfully!"));
         start();
     })
 });

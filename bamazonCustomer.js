@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const chalk = require('chalk');
 const cTable = require('console.table');
 
 const connection = mysql.createConnection({
@@ -65,7 +66,7 @@ function shop() {
             }]).then(function (answer) {
                 var chosenItem = res.filter(elem => elem.id === parseInt(answer.idNumber))[0];
                 if (chosenItem.stock_quantity < parseInt(answer.quantity)) {
-                    console.log("insufficient quantity!");
+                    console.log(chalk.red.bold("insufficient quantity!"));
                     start();
 
                 } else {
@@ -81,7 +82,7 @@ function shop() {
                     ], function (error) {
 
 
-                        console.log("Total Cost of your purchase: " + parseInt(answer.quantity) * chosenItem.price);
+                        console.log(chalk.bgRed.yellow.bold("Total Cost of your purchase: " + parseInt(answer.quantity) * chosenItem.price));
                         start();
 
                     })

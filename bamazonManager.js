@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const chalk = require('chalk');
 const cTable = require('console.table');
 
 const connection = mysql.createConnection({
@@ -60,8 +61,9 @@ function viewProducts() {
 }
 
 function lowInventory() {
-    connection.query("SELECT * FROM products", function (err, res) {
-        console.table(res.filter(elem => elem.stock_quantity < 5));
+    connection.query("SELECT * FROM products WHERE stock_quantity < 5", function (err, res) {
+        // console.table(res.filter(elem => elem.stock_quantity < 5));
+        console.table(res);
         start();
     })
 }
@@ -95,7 +97,7 @@ function addInventory() {
             }, {
                 id: parseInt(answer.id)
             }], function (err) {
-                console.log("Inventory successfully updated!");
+                console.log(chalk.bold.red("Inventory successfully updated!"));
                 start();
             });
         });
@@ -146,13 +148,13 @@ function addProduct() {
                 "INSERT INTO products SET ?",
                 {
                     product_name: answer.productname,
-                    department_name: answer.departmentname,
+                    department: answer.departmentname,
                     price: parseInt(answer.price),
                     stock_quantity: parseInt(answer.quantity)
                 },
                 function (err) {
 
-                    console.log("Your product was created successfully!");
+                    console.log(chalk.red.bold("Your product was created successfully!"));
 
                     start();
                 }
